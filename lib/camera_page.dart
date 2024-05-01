@@ -4,15 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CameraPage extends StatefulWidget {
-  const CameraPage({Key? key}) : super(key: key);
-
-  @override
-  _CameraPageState createState() => _CameraPageState();
-}
-
-class _CameraPageState extends State<CameraPage> {
+class CameraApp extends StatefulWidget {
   File? image;
+  CameraApp({Key? key});
 
   Future<void> pickImageAndSave(ImageSource source) async {
     try {
@@ -23,9 +17,7 @@ class _CameraPageState extends State<CameraPage> {
       }
 
       final imageTemporary = File(image.path);
-      setState(() {
-        this.image = imageTemporary;
-      });
+      this.image = imageTemporary;
 
       // Save image to gallery
       final bool? isSaved = await GallerySaver.saveImage(imageTemporary.path);
@@ -40,55 +32,78 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   @override
+  State<CameraApp> createState() => _CameraAppState();
+}
+
+class _CameraAppState extends State<CameraApp> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF403948),
       appBar: AppBar(
-        title: const Text('Image Picker Example'),
+        title: const Text('Image Upload'),
+        centerTitle: true,
+        backgroundColor: Colors.grey[200],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildButton(
-              'Pick Image from Camera',
-              Icons.camera,
-              () {
-                pickImageAndSave(ImageSource.camera);
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InkWell(
+                  onTap: () {
+                    widget.pickImageAndSave(ImageSource.camera);
+                  },
+                  child: Column(
+                    children: [
+                      Ink(
+                        decoration: const ShapeDecoration(
+                          color: Colors.white,
+                          shape: CircleBorder(),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.camera_alt_rounded,
+                              size: 96, color: const Color(0xFF403948)),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Pick Image from Camera',
+                          style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    widget.pickImageAndSave(ImageSource.gallery);
+                  },
+                  child: Column(
+                    children: [
+                      Ink(
+                        decoration: const ShapeDecoration(
+                          color: Colors.white,
+                          shape: CircleBorder(),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.photo_library,
+                              size: 96, color: const Color(0xFF403948)),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Pick Image from Gallery',
+                          style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            buildButton(
-              'Pick Image from Gallery',
-              Icons.photo_library,
-              () {
-                pickImageAndSave(ImageSource.gallery);
-              },
-            ),
-            if (image != null) Image.file(image!),
+            if (widget.image != null) Image.file(widget.image!),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget buildButton(String title, IconData icon, VoidCallback onClicked) {
-    return ElevatedButton(
-      onPressed: onClicked,
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        minimumSize: const Size(double.infinity, 50), // Make it responsive
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        textStyle: const TextStyle(fontSize: 14),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon),
-          const SizedBox(width: 8),
-          Text(title),
-        ],
       ),
     );
   }
